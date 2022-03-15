@@ -8,7 +8,7 @@ The project uses the LAN connection to share files through TCP sockets, so we ar
 
 Tested in:
 
-- [x] Windows 10
+- [x] Windows 11
 - [x] Linux
 - [x] Andorid
 - [ ] iOS
