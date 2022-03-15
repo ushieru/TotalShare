@@ -13,3 +13,15 @@ Tested in:
 - [x] Andorid
 - [ ] iOS
 - [ ] MacOS
+
+# Test
+
+## Windows -> Windows 
+![Total Share test](./windows-windows.gif)
+
+## Android -> Windows 
+
+| Android                                    | Windows                                    |
+| ------------------------------------------ | ------------------------------------------ |
+|                                            |                                            |
+| ![Total Share test](./android-windows.gif) | ![Total Share test](./windows-android.gif) |
