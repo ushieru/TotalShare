@@ -1,6 +1,6 @@
 # Total Share
 
-File sharing via TCP sockets.
+File sharing via TCP sockets. Works with any file. 😉
 
 The project uses the LAN connection to share files through TCP sockets, so we are not limited by the speed of our Internet.
 
