@@ -7,13 +7,19 @@ import 'package:network_info_plus/network_info_plus.dart';
 
 class WrapServerSocket {
   late String address;
+
+  /// key -> handlerName
+  /// value -> handler function
   final Map<String, Function(Socket socket, Uint8List payload, {dynamic meta})>
       _handlers = {};
-  final Map<String, BytesBuilder> _builders = {};
 
-  dynamic _meta;
-  String? _currentHandlerName;
-  Function(Socket socket, Uint8List payload, {dynamic meta})? _currentHandler;
+  /// key -> socketKey
+  /// value -> current handlerName
+  final Map<String, String> _workers = {};
+
+  /// key -> socketKey
+  /// value -> current metadata
+  final Map<String, dynamic> _metadata = {};
 
   WrapServerSocket._(callback) {
     ServerSocket.bind(InternetAddress.anyIPv4, 0).then((serverSocket) {
@@ -35,37 +41,26 @@ class WrapServerSocket {
 
   _handlerSocket(Socket socket) {
     final socketKey = socket.remoteAddress.toString();
-    _builders[socketKey] = BytesBuilder(copy: false);
     socket.listen((payload) {
       final payloadString = String.fromCharCodes(payload);
       if (payloadString.contains('payload')) {
-        _setHandler(payloadString);
+        debugPrint('GET ACTION AND METADATA');
+        final payloadJson = json.decode(payloadString);
+        final handlerName = payloadJson['action'] as String;
+        if (!_handlers.containsKey(handlerName)) return;
+        _workers[socketKey] = handlerName;
+        _metadata[socketKey] = payloadJson;
+        debugPrint('[SET HANDLER] $handlerName');
       } else if (payloadString == 'DONE') {
-        _drainPayloadToAHandler(socket, _builders[socketKey]!);
-      } else if (_currentHandler != null) {
-        _builders[socketKey]!.add(payload);
+        _workers.remove(socketKey);
+        _metadata.remove(socketKey);
+        debugPrint('[CLEAR HANDLER]');
+      } else if (_workers.containsKey(socketKey)) {
+        debugPrint('[RECEIVE PAYLOAD]');
+        _handlers[_workers[socketKey]]!(socket, payload,
+            meta: _metadata[socketKey]);
       }
     });
-  }
-
-  _setHandler(String payload) {
-    _meta = json.decode(payload);
-    final handler = _handlers[_meta['action']];
-    if (handler == null) return;
-    _currentHandlerName = _meta['action'];
-    debugPrint('[SET HANDLER] $_currentHandlerName');
-    _currentHandler = handler;
-  }
-
-  _drainPayloadToAHandler(Socket socket, BytesBuilder builder) {
-    debugPrint('[TRIGGER HANDLER] $_currentHandlerName');
-    Uint8List dt = builder.toBytes();
-    Uint8List payload = dt.buffer.asUint8List(0, dt.buffer.lengthInBytes);
-    _currentHandler!(socket, payload, meta: _meta);
-    builder.clear();
-    _currentHandler = null;
-    _currentHandlerName = null;
-    debugPrint('[CLEAR HANDLER]');
   }
 
   addHandler(String action,
