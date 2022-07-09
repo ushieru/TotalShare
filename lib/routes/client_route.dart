@@ -75,7 +75,7 @@ class ClientRoute extends GetView<ClientSocketController> {
                     options: {'name': fileName, 'ext': fileExt},
                     middleware: (socket) async {
                   if (!file.existsSync()) return;
-                  await socket.addStream(file.openRead());
+                  socket.addStream(file.openRead());
                 });
               },
               child: const Text('Send Data'),
