@@ -8,19 +8,24 @@ class ClientSocketController extends GetxController {
   RxBool isConnected = false.obs;
   Socket? socket;
 
-  connect(String serverAddress, String name) async {
+  Future<void> connect(String serverAddress, String name) async {
     final serverAddressSplit = serverAddress.split(':');
     debugPrint('Try connect to $serverAddressSplit');
-    socket = await Socket.connect(
-      serverAddressSplit[0],
-      int.parse(serverAddressSplit[1]),
-    );
-    isConnected.toggle();
-    sendPayload('register',
-        middleware: (Socket socket) async => socket.write(name));
+    try {
+      socket = await Socket.connect(
+        serverAddressSplit[0],
+        int.parse(serverAddressSplit[1]),
+      );
+      isConnected.toggle();
+      sendPayload('register',
+          middleware: (Socket socket) async => socket.write(name));
+    } catch (e) {
+      debugPrint('Error connect to $serverAddressSplit');
+      debugPrint('Error: $e');
+    }
   }
 
-  sendPayload(
+  Future<void> sendPayload(
     String action, {
     Future Function(Socket socket)? middleware,
     Map<String, String>? options,
@@ -35,6 +40,8 @@ class ClientSocketController extends GetxController {
     await socket!.flush();
     await Future.delayed(const Duration(milliseconds: 200));
     if (middleware != null) await middleware(socket!);
+    await Future.delayed(const Duration(milliseconds: 200));
+    await socket!.flush();
     await Future.delayed(const Duration(milliseconds: 200));
     socket!.write('DONE');
   }
