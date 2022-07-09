@@ -44,7 +44,7 @@ class WrapServerSocket {
     socket.listen((payload) {
       final payloadString = String.fromCharCodes(payload);
       if (payloadString.contains('payload')) {
-        debugPrint('GET ACTION AND METADATA');
+        debugPrint('[GET ACTION AND METADATA]');
         final payloadJson = json.decode(payloadString);
         final handlerName = payloadJson['action'] as String;
         if (!_handlers.containsKey(handlerName)) return;
