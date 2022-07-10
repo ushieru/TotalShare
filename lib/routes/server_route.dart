@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart' as path;
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:total_share/controller/server_socket_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:total_share/controller/server_socket_controller.dart';
 
 class ServerRoute extends GetView<ServerSocketController> {
   static const String routeName = '/server';
